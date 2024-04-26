@@ -187,12 +187,12 @@ select Ticket.Id,
        C.Name,
        Email,
        Phone,
-       sum(B.Price * Quantity) TotalAmount
+      sum((B.Price * Quantity)) TotalAmount
 from ticket
          join TicketDetail TD on ticket.Id = TD.TicketId
          join Customer C on ticket.CustomerId = C.Id
          join Book B on B.Id = TD.BookId
-group by B.Id, TicketId;
+group by Ticket.Id, TicketId;
 select *
 from v_getTicketList;
 
@@ -220,6 +220,28 @@ begin
          AuthorId_IN);
 end
 //
+
+delimiter //
+create procedure getTicketByCustomerId(id_IN int)
+begin
+    select Customer.Id,
+           TicketDate,
+           case
+               when T.Status = 0 then 'Chưa trả'
+               when T.Status = 1 then 'Đã trả'
+               when T.Status = 2 then 'Quá hạn'
+               when T.Status = 3 then 'Đã hủy'
+               end,
+           sum((price * Quantity)) totalAmount
+    from customer
+             join Ticket T on customer.Id = T.CustomerId
+             join TicketDetail TD on T.Id = TD.TicketId
+             join Book B on B.Id = TD.BookId
+    where Customer.Id = Id_in
+    group by Customer.Id,TicketId;
+end
+//
+call getTicketByCustomerId(1);
 delete
 from book
 where id = 16;
@@ -232,3 +254,18 @@ begin
     set off_set = page * size;
     select Id, Name, Price from book limit off_set, size;
 end //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
